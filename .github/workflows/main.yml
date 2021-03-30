@@ -1,25 +1,16 @@
-# This is a basic workflow to help you get started with Actions
+name: Update OpenTelemetry Website Docs
 
-name: release-pr
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
+  # triggers on a release publication or on a manual push
   release:
+    types: [ published ]
     branch: [ main ]
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  update-notes:
-    # The type of runner that the job will run on
+  update-docs:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
         uses: actions/checkout@v2
       - name: make-pr
@@ -27,15 +18,19 @@ jobs:
           API_TOKEN_GITHUB: ${{secrets.API_TOKEN_GITHUB}}
           USER_EMAIL: austin@lightstep.com
           USER_NAME: austinlparker
+          # Destination repo should always be 'open-telemetry/opentelemetry.io'
           DESTINATION_REPO: austinlparker/release-pr-target
+          # Destination path should be the absolute path to your language's friendly name in the docs tree (i.e, 'content/en/docs/java')
           DESTINATION_PATH: content/en/docs/java
+          # Source path should be 'website_docs', all files and folders are copied from here to dest
+          SOURCE_PATH: website_docs
         run: |
           TARGET_DIR=$(mktemp -d)
           export GITHUB_TOKEN=$API_TOKEN_GITHUB
           git config --global user.email "$USER_EMAIL"
           git config --global user.name "$USER_NAME"
           git clone "https://$API_TOKEN_GITHUB@github.com/$DESTINATION_REPO.git" "$TARGET_DIR"
-          cp website_docs/* "$TARGET_DIR/$DESTINATION_PATH"
+          cp -r $SOURCE_PATH/* "$TARGET_DIR/$DESTINATION_PATH"
           cd "$TARGET_DIR"
           git checkout -b docs-$GITHUB_REPOSITORY-$GITHUB_SHA
           git add .
