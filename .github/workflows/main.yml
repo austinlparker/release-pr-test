@@ -22,15 +22,25 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: checkout
         uses: actions/checkout@v2
-      - name: create-pr
-        uses: paygoc6/action-pull-request-another-repo@v1.01
+      - name: make-pr
         env:
           API_TOKEN_GITHUB: ${{secrets.API_TOKEN_GITHUB}}
-        with:
-          source_folder: 'website_docs'
-          destination_repo: 'austinlparker/release-pr-target'
-          destination_folder: 'content/en/docs/java'
-          destination_head_branch: 'docs-$GITHUB_REPOSITORY-$GITHUB_SHA'
-          user_email: 'austin@lightstep.com'
-          user_name: 'austinlparker'
+          USER_EMAIL: austin@lightstep.com
+          USER_NAME: austinlparker
+          DESTINATION_REPO: austinlparker/release-pr-target
+          DESTINATION_PATH: content/en/docs/java
+        run: |
+          TARGET_DIR=$(mktemp -d)
+          export GITHUB_TOKEN=$API_TOKEN_GITHUB
+          git config --global user.email "$USER_EMAIL"
+          git config --global user.name "$USER_NAME"
+          git clone "https://$API_TOKEN_GITHUB@github.com/$DESTINATION_REPO.git" "$TARGET_DIR"
+          cp website_docs/* "$TARGET_DIR/$DESTINATION_PATH"
+          cd "$TARGET_DIR"
+          git checkout -b docs-$GITHUB_REPOSITORY-$GITHUB_SHA
+          git add .
+          git commit -m "Docs update from $GITHUB_REPOSITORY"
+          git push -u origin HEAD:docs-$GITHUB_REPOSITORY-$GITHUB_SHA
+          gh pr create -t "Docs Update from $GITHUB_REPOSITORY" -b "This is an automated pull request" -B main -H docs-$GITHUB_REPOSITORY-$GITHUB_SHA
+          echo "done"
           
