@@ -28,19 +28,19 @@ jobs:
           USER_EMAIL: austin@lightstep.com
           USER_NAME: austinlparker
           DESTINATION_REPO: austinlparker/release-pr-target
-          LANGUAGE: java
+          DESTINATION_PATH: content/en/docs/java
         run: |
           TARGET_DIR=$(mktemp -d)
           export GITHUB_TOKEN=$API_TOKEN_GITHUB
           git config --global user.email "$USER_EMAIL"
           git config --global user.name "$USER_NAME"
           git clone "https://$API_TOKEN_GITHUB@github.com/$DESTINATION_REPO.git" "$TARGET_DIR"
-          cp website_docs/* "$TARGET_DIR/content/en/$LANGUAGE"
+          cp website_docs/* "$TARGET_DIR/$DESTINATION_PATH"
           cd "$TARGET_DIR"
           git checkout -b docs-$GITHUB_REPOSITORY-$GITHUB_SHA
           git add .
           git commit -m "Docs update from $GITHUB_REPOSITORY"
           git push -u origin HEAD:docs-$GITHUB_REPOSITORY-$GITHUB_SHA
-          gh pr create -t docs-$GITHUB_REPOSITORY-$GITHUB_SHA -b docs-$GITHUB_REPOSITORY-$GITHUB_SHA -B main -H docs-$GITHUB_REPOSITORY-$GITHUB_SHA
+          gh pr create -t "Docs Update from $GITHUB_REPOSITORY" -b "This is an automated pull request" -B main -H docs-$GITHUB_REPOSITORY-$GITHUB_SHA
           echo "done"
           
