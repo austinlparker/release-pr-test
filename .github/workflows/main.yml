@@ -27,10 +27,10 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{secrets.API_TOKEN_GITHUB}}
         with:
-          source_folder: 'website_docs'
+          source_folder: 'website_docs/*'
           destination_repo: 'austinlparker/release-pr-target'
           destination_folder: 'content/en/docs/java'
-          destination_head_branch: 'docs-$GITHUB_REPOSITORY-$GITHUB_SHA'
+          destination_head_branch: "docs-$GITHUB_REPOSITORY-$GITHUB_SHA"
           user_email: 'austin@lightstep.com'
           user_name: 'austinlparker'
           
